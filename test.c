@@ -7,20 +7,15 @@ using namespace std;
 // magic goes here ------------------------------------------
 
 #define TOKEN_CONCAT(x, y) x ## y
-#define MAKE_STATE(state_id, ...) save_context(&&TOKEN_CONCAT(st, state_id)); __VA_ARGS__; calling(); goto _recursive_context_reentry; TOKEN_CONCAT(st, state_id):
+#define MAKE_STATE(state_id, ...) save_context(&&TOKEN_CONCAT(st, state_id)); __VA_ARGS__; _currState = NULL; goto _recursive_context_reentry; TOKEN_CONCAT(st, state_id):
 #define CALL_SELF(...) MAKE_STATE(__COUNTER__, __VA_ARGS__)
 #define RET_VAL _returnValue
-#define RETURN(x) { _ret_val = x; goto _recursive_context_reentry; }
+#define RETURN(x) { _ret_val = x; goto st_done; }
 #define DECLARE_RECURSIVE_FUNCTION_START(returnType, functionName) \
 struct functionName { \
-	using ReturnType = returnType; \
+	typedef returnType ReturnType; \
 	static std::stack<functionName> _ctxStack; \
-	void *_currState = nullptr; \
-	\
-	inline void calling() { \
-		_currState = nullptr; \
-		_ctxStack.push(*this); \
-	} \
+	void *_currState = NULL; \
 	\
 	inline void save_context(void *nextState) { \
 		std::swap(_currState, nextState); \
@@ -33,20 +28,20 @@ struct functionName { \
 #define DECLARE_RECURSIVE_FUNCTION_END \
 ReturnType call() { \
 		ReturnType _ret_val; \
-		save_context(0); \
+		_currState = NULL; \
 		\
-_recursive_context_reentry: \
-		if (!_ctxStack.empty()) { \
+		{ \
+		_recursive_context_reentry: \
 			ReturnType RET_VAL = _ret_val; \
-			*this = _ctxStack.top(); \
-			_ctxStack.pop(); \
 			if (_currState) goto *_currState;
 
 #define RECURSIVE_FUNCTION_END(functionName) \
+		st_done: \
+			if (_ctxStack.empty()) return _ret_val; \
+			*this = _ctxStack.top(); \
+			_ctxStack.pop(); \
 			goto _recursive_context_reentry; \
 		} \
-		if (_ctxStack.empty()) return _ret_val; \
-		\
 	} \
 }; \
 std::stack<functionName> functionName::_ctxStack;
