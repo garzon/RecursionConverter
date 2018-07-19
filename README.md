@@ -1,8 +1,8 @@
 # RecursionConverter
-C++14 macros that can be used to convert recursive function into a state-based loop with context
+C++ macros that can be used to convert recursive function into a state-based loop with context
 
 ```
-g++ test.c -o test -O3 -std=gnu++14
+g++ test.c -o test -O3
 ```
 
 ### example
@@ -32,6 +32,6 @@ int fib(int n) {
 
 int main() {
 	cout << fib(1) << " " << fib(2) << " " << fib(3) << " " << fib(4) << " " << fib(5) << endl; // 1 2 3 5 8
-  return 0;
+	return 0;
 }
 ```
