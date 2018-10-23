@@ -2,7 +2,7 @@
 C++ macros that can be used to convert recursive function into a state-based loop with context
 
 ```
-g++ test.c -o test -O3
+g++ test.cpp -o test -O3
 ```
 
 ### example
